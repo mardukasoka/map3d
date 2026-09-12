@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { CircleMarker, Tooltip } from "react-leaflet";
-import { LIVE_LAYER_REGISTRY } from "../../live/layerRegistry";
+import { LIVE_LAYER_REGISTRY, type LiveLayerId } from "../../live/layerRegistry";
 import { fetchLiveLayer, hasLiveLayerAdapter } from "../../live/runtime";
 import { viewportCanActivateLayer } from "../../live/viewport";
 import { useLiveDataStore } from "../../state/liveDataStore";
@@ -14,10 +14,10 @@ export function LiveLayerRuntime() {
   const setResponse = useLiveDataStore((state) => state.setResponse);
   const setError = useLiveDataStore((state) => state.setError);
   const clearLayer = useLiveDataStore((state) => state.clearLayer);
-  const controllersRef = useRef(new Map<string, AbortController>());
-  const timersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const controllersRef = useRef(new Map<LiveLayerId, AbortController>());
+  const timersRef = useRef(new Map<LiveLayerId, ReturnType<typeof setTimeout>>());
 
-  const activeIds = useMemo(() => {
+  const activeIds = useMemo<LiveLayerId[]>(() => {
     if (!viewport) return [];
     return LIVE_LAYER_REGISTRY
       .filter(
@@ -29,7 +29,7 @@ export function LiveLayerRuntime() {
   }, [enabled, viewport]);
 
   useEffect(() => {
-    const cancelLayer = (id: string) => {
+    const cancelLayer = (id: LiveLayerId) => {
       controllersRef.current.get(id)?.abort();
       controllersRef.current.delete(id);
       const timer = timersRef.current.get(id);
@@ -38,15 +38,15 @@ export function LiveLayerRuntime() {
     };
 
     if (!viewport) {
-      for (const id of new Set([
+      for (const id of new Set<LiveLayerId>([
         ...controllersRef.current.keys(),
         ...timersRef.current.keys(),
       ])) cancelLayer(id);
       return;
     }
 
-    const activeSet = new Set(activeIds);
-    for (const id of new Set([
+    const activeSet = new Set<LiveLayerId>(activeIds);
+    for (const id of new Set<LiveLayerId>([
       ...controllersRef.current.keys(),
       ...timersRef.current.keys(),
     ])) {
@@ -88,7 +88,7 @@ export function LiveLayerRuntime() {
     }
 
     return () => {
-      for (const id of new Set([
+      for (const id of new Set<LiveLayerId>([
         ...controllersRef.current.keys(),
         ...timersRef.current.keys(),
       ])) cancelLayer(id);
