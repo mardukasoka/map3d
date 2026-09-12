@@ -15,6 +15,7 @@ export function LiveLayerRuntime() {
   const setError = useLiveDataStore((state) => state.setError);
   const clearLayer = useLiveDataStore((state) => state.clearLayer);
   const controllersRef = useRef(new Map<string, AbortController>());
+  const timersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
   const activeIds = useMemo(() => {
     if (!viewport) return [];
@@ -28,18 +29,28 @@ export function LiveLayerRuntime() {
   }, [enabled, viewport]);
 
   useEffect(() => {
+    const cancelLayer = (id: string) => {
+      controllersRef.current.get(id)?.abort();
+      controllersRef.current.delete(id);
+      const timer = timersRef.current.get(id);
+      if (timer) clearTimeout(timer);
+      timersRef.current.delete(id);
+    };
+
     if (!viewport) {
-      for (const controller of controllersRef.current.values()) controller.abort();
-      controllersRef.current.clear();
+      for (const id of new Set([
+        ...controllersRef.current.keys(),
+        ...timersRef.current.keys(),
+      ])) cancelLayer(id);
       return;
     }
 
     const activeSet = new Set(activeIds);
-    for (const [id, controller] of controllersRef.current) {
-      if (!activeSet.has(id)) {
-        controller.abort();
-        controllersRef.current.delete(id);
-      }
+    for (const id of new Set([
+      ...controllersRef.current.keys(),
+      ...timersRef.current.keys(),
+    ])) {
+      if (!activeSet.has(id)) cancelLayer(id);
     }
 
     for (const layer of LIVE_LAYER_REGISTRY) {
@@ -48,30 +59,39 @@ export function LiveLayerRuntime() {
         continue;
       }
 
-      const previous = controllersRef.current.get(layer.id);
-      previous?.abort();
-      const controller = new AbortController();
-      controllersRef.current.set(layer.id, controller);
-      setLoading(layer.id);
+      const run = () => {
+        cancelLayer(layer.id);
+        const controller = new AbortController();
+        controllersRef.current.set(layer.id, controller);
+        setLoading(layer.id);
 
-      void fetchLiveLayer(layer.id, viewport, controller.signal)
-        .then((response) => {
-          if (!controller.signal.aborted) setResponse(response);
-        })
-        .catch((error: unknown) => {
-          if (controller.signal.aborted) return;
-          setError(layer.id, error instanceof Error ? error.message : String(error));
-        })
-        .finally(() => {
-          if (controllersRef.current.get(layer.id) === controller) {
-            controllersRef.current.delete(layer.id);
-          }
-        });
+        void fetchLiveLayer(layer.id, viewport, controller.signal)
+          .then((response) => {
+            if (!controller.signal.aborted) setResponse(response);
+          })
+          .catch((error: unknown) => {
+            if (controller.signal.aborted) return;
+            setError(layer.id, error instanceof Error ? error.message : String(error));
+          })
+          .finally(() => {
+            if (controllersRef.current.get(layer.id) === controller) {
+              controllersRef.current.delete(layer.id);
+            }
+            if (!controller.signal.aborted) {
+              const timer = setTimeout(run, layer.refreshMs);
+              timersRef.current.set(layer.id, timer);
+            }
+          });
+      };
+
+      run();
     }
 
     return () => {
-      for (const controller of controllersRef.current.values()) controller.abort();
-      controllersRef.current.clear();
+      for (const id of new Set([
+        ...controllersRef.current.keys(),
+        ...timersRef.current.keys(),
+      ])) cancelLayer(id);
     };
   }, [activeIds, clearLayer, enabled, setError, setLoading, setResponse, viewport]);
 
