@@ -52,9 +52,9 @@ export const LIVE_LAYER_REGISTRY: readonly LiveLayerDefinition[] = Object.freeze
     enabledByDefault: false,
     minZoom: 3,
     refreshMs: 10000,
-    cacheTtlMs: 60000,
+    cacheTtlMs: 9000,
     viewportOnly: true,
-    sourceRole: "TLE/satellite propagation adapter",
+    sourceRole: "CelesTrak visual-group GP data with local SGP4 propagation",
   }),
   Object.freeze({
     id: "earthquakes",
