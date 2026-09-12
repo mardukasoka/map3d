@@ -4,21 +4,47 @@ import type {
   LiveLayerResponse,
   LiveFeature,
 } from "../adapter";
+import type { GeoBounds } from "../viewport";
 
 const ENDPOINT = "https://earthquake.usgs.gov/fdsnws/event/1/query";
 
-function buildUrl(request: LiveLayerRequest): string {
-  const { west, south, east, north } = request.viewport.bounds;
+type UsgsItem = {
+  id?: string;
+  geometry?: { coordinates?: number[] };
+  properties?: {
+    mag?: number | null;
+    place?: string | null;
+    time?: number | null;
+    url?: string | null;
+  };
+};
+
+function buildUrl(bounds: GeoBounds): string {
   const params = new URLSearchParams({
     format: "geojson",
-    minlatitude: String(south),
-    maxlatitude: String(north),
-    minlongitude: String(west),
-    maxlongitude: String(east),
+    minlatitude: String(bounds.south),
+    maxlatitude: String(bounds.north),
+    minlongitude: String(bounds.west),
+    maxlongitude: String(bounds.east),
     orderby: "time",
     limit: "250",
   });
   return `${ENDPOINT}?${params.toString()}`;
+}
+
+function splitDatelineBounds(bounds: GeoBounds): GeoBounds[] {
+  if (bounds.west <= bounds.east) return [bounds];
+  return [
+    { ...bounds, east: 180 },
+    { ...bounds, west: -180 },
+  ];
+}
+
+async function fetchItems(bounds: GeoBounds, signal?: AbortSignal): Promise<UsgsItem[]> {
+  const response = await fetch(buildUrl(bounds), { signal });
+  if (!response.ok) throw new Error(`USGS earthquake request failed: ${response.status}`);
+  const json = (await response.json()) as { features?: UsgsItem[] };
+  return json.features ?? [];
 }
 
 export const usgsEarthquakesAdapter: LiveLayerAdapter = {
@@ -29,18 +55,22 @@ export const usgsEarthquakesAdapter: LiveLayerAdapter = {
       throw new Error("USGS earthquake adapter only supports the earthquakes layer");
     }
 
-    const response = await fetch(buildUrl(request), { signal: request.signal });
-    if (!response.ok) throw new Error(`USGS earthquake request failed: ${response.status}`);
-    const json = await response.json() as {
-      features?: Array<{
-        id?: string;
-        geometry?: { coordinates?: number[] };
-        properties?: { mag?: number | null; place?: string | null; time?: number | null; url?: string | null };
-      }>;
-    };
+    const parts = splitDatelineBounds(request.viewport.bounds);
+    const responses = await Promise.all(
+      parts.map((bounds) => fetchItems(bounds, request.signal)),
+    );
+
+    const items = new Map<string, UsgsItem>();
+    for (const item of responses.flat()) {
+      const coordinates = item.geometry?.coordinates;
+      const fallbackKey = coordinates
+        ? `${coordinates[0]}:${coordinates[1]}:${item.properties?.time ?? 0}`
+        : `unknown:${items.size}`;
+      items.set(item.id ?? fallbackKey, item);
+    }
 
     const features: LiveFeature[] = [];
-    for (const item of json.features ?? []) {
+    for (const item of items.values()) {
       const coordinates = item.geometry?.coordinates;
       if (!coordinates || coordinates.length < 2) continue;
       const [lon, lat, depthKm] = coordinates;
