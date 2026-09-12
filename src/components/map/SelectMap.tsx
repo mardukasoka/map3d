@@ -11,6 +11,7 @@ import { css } from "@emotion/react";
 import { CircleMinus, MousePointerClick } from "lucide-react";
 import { useLiveLayerStore } from "../../state/liveLayerStore";
 import { LiveLayerTray } from "./LiveLayerTray";
+import { LiveLayerRuntime } from "./LiveLayerRuntime";
 
 const IconSize = css({
   width: "14px",
@@ -268,6 +269,7 @@ export function MapComponent({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <LiveViewportObserver />
+        <LiveLayerRuntime />
         <RectangleSelector
           bounds={bounds}
           drawBounds={drawBounds}
