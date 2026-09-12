@@ -96,6 +96,7 @@ export function LiveLayerRuntime() {
   }, [activeIds, clearLayer, enabled, setError, setLoading, setResponse, viewport]);
 
   const earthquakeFeatures = layers.earthquakes?.features ?? [];
+  const satelliteFeatures = layers.satellites?.features ?? [];
 
   return (
     <>
@@ -113,6 +114,25 @@ export function LiveLayerRuntime() {
               <div>
                 <strong>{feature.label ?? "Earthquake"}</strong>
                 <br />M {Number.isFinite(magnitude) ? magnitude.toFixed(1) : "?"}
+              </div>
+            </Tooltip>
+          </CircleMarker>
+        );
+      })}
+
+      {satelliteFeatures.map((feature) => {
+        const altitudeKm = Number(feature.altitudeM ?? 0) / 1000;
+        return (
+          <CircleMarker
+            key={feature.id}
+            center={[feature.lat, feature.lon]}
+            radius={3}
+            pathOptions={{ weight: 1, fillOpacity: 0.8 }}
+          >
+            <Tooltip direction="top">
+              <div>
+                <strong>{feature.label ?? "Satellite"}</strong>
+                <br />Altitude {Number.isFinite(altitudeKm) ? altitudeKm.toFixed(0) : "?"} km
               </div>
             </Tooltip>
           </CircleMarker>
