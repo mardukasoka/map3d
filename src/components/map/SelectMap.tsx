@@ -10,6 +10,7 @@ import "leaflet/dist/leaflet.css";
 import { css } from "@emotion/react";
 import { CircleMinus, MousePointerClick } from "lucide-react";
 import { useLiveLayerStore } from "../../state/liveLayerStore";
+import { LiveLayerTray } from "./LiveLayerTray";
 
 const IconSize = css({
   width: "14px",
@@ -253,6 +254,7 @@ export function MapComponent({
         </button>
       </div>
 
+      <LiveLayerTray />
       <MapContainer
         center={[40.8, -73.95]}
         zoom={13}
