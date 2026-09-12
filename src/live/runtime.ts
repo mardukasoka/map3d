@@ -2,9 +2,11 @@ import { assertLayerResponse, type LiveLayerAdapter, type LiveLayerResponse } fr
 import { getLiveLayerDefinition, type LiveLayerId } from "./layerRegistry";
 import type { LiveViewport } from "./viewport";
 import { usgsEarthquakesAdapter } from "./adapters/usgsEarthquakes";
+import { celestrakSatellitesAdapter } from "./adapters/celestrakSatellites";
 
 const adapters: Partial<Record<LiveLayerId, LiveLayerAdapter>> = {
   earthquakes: usgsEarthquakesAdapter,
+  satellites: celestrakSatellitesAdapter,
 };
 
 type CacheEntry = {
@@ -13,6 +15,7 @@ type CacheEntry = {
 };
 
 const cache = new Map<string, CacheEntry>();
+const MAX_CACHE_ENTRIES = 48;
 
 function round(value: number, places = 2): number {
   const factor = 10 ** places;
@@ -23,7 +26,7 @@ export function liveViewportCacheKey(id: LiveLayerId, viewport: LiveViewport): s
   const { west, south, east, north } = viewport.bounds;
   return [
     id,
-    viewport.zoom,
+    Math.floor(viewport.zoom),
     round(west),
     round(south),
     round(east),
@@ -33,6 +36,15 @@ export function liveViewportCacheKey(id: LiveLayerId, viewport: LiveViewport): s
 
 export function hasLiveLayerAdapter(id: LiveLayerId): boolean {
   return Boolean(adapters[id]);
+}
+
+function trimCache(): void {
+  clearExpiredLiveLayerCache();
+  while (cache.size > MAX_CACHE_ENTRIES) {
+    const oldestKey = cache.keys().next().value as string | undefined;
+    if (!oldestKey) break;
+    cache.delete(oldestKey);
+  }
 }
 
 export async function fetchLiveLayer(
@@ -55,10 +67,12 @@ export async function fetchLiveLayer(
     id,
   );
 
+  cache.delete(key);
   cache.set(key, {
     expiresAt: now + definition.cacheTtlMs,
     response,
   });
+  trimCache();
 
   return response;
 }
