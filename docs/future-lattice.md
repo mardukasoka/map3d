@@ -86,6 +86,21 @@ Initial provider families:
 - industry scenarios
 - science-fiction futures
 
+### First comparison slice
+
+The first joined checkpoint keeps four model roles distinct:
+
+- Earth4All supplies the branch-defining integrated scenario state.
+- WorldDynamics/World3 supplies the preserved system-dynamics lineage comparator.
+- Destination Earth supplies bounded Earth-system projections or forecasts.
+- ISIMIP supplies bounded cross-sector impact projections with dataset-level provenance.
+
+EarthEngine alone supplies observations for later calibration. Destination Earth and
+ISIMIP outputs must never enter the observation slot, even when they describe the
+present or use observation-constrained initial conditions. Comparisons use only shared
+normalized metric keys and preserve the original units, scenario, model, extraction,
+dataset, DOI, checksum, and source references. Incompatible outputs are not averaged.
+
 The ANU Australia-2050 visualisation is retained as a scenario-bound historical projection source and should be compared with newer model generations rather than treated as a universal 2050 forecast.
 
 ## UI direction

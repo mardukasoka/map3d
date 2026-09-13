@@ -1,4 +1,8 @@
-import type { FutureSpatialScope } from "./types";
+import type {
+  FutureEpistemicClass,
+  FutureSourceClass,
+  FutureSpatialScope,
+} from "./types";
 
 export type FutureStateDomain =
   | "population"
@@ -27,6 +31,8 @@ export type NormalizedStateMetric = {
 export type ModelRunProvenance = {
   providerId: string;
   modelId: string;
+  sourceClass?: FutureSourceClass;
+  epistemicClass?: FutureEpistemicClass;
   modelVersion?: string;
   scenarioId?: string;
   scenarioLabel?: string;
@@ -34,6 +40,9 @@ export type ModelRunProvenance = {
   runAt?: string;
   sourceRepository?: string;
   sourceRef?: string;
+  datasetId?: string;
+  doi?: string;
+  checksum?: string;
 };
 
 export type NormalizedFutureStateVector = {

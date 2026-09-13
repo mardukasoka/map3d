@@ -7,7 +7,23 @@ export type JoinedFutureCheckpoint = {
   earth4AllState: NormalizedFutureStateVector;
   worldDynamicsComparator: NormalizedFutureStateVector;
   sharedMetricKeys: readonly string[];
+  externalComparisons: readonly JoinedExternalComparison[];
   comparisonRule: string;
+};
+
+export type JoinedExternalComparisonKind =
+  | "earth-system-projection"
+  | "impact-projection";
+
+export type JoinedExternalComparison = {
+  kind: JoinedExternalComparisonKind;
+  state: NormalizedFutureStateVector;
+  sharedMetricKeys: readonly string[];
+};
+
+export type JoinedExternalEvidence = {
+  destinationEarth?: readonly NormalizedFutureStateVector[];
+  isimip?: readonly NormalizedFutureStateVector[];
 };
 
 function targetYearOf(vector: NormalizedFutureStateVector): number {
@@ -23,6 +39,7 @@ export function assembleJoinedFutureCheckpoint(
   targetYear: JoinedTestHorizon,
   earth4AllState: NormalizedFutureStateVector,
   worldDynamicsComparator: NormalizedFutureStateVector,
+  externalEvidence: JoinedExternalEvidence = {},
 ): JoinedFutureCheckpoint {
   if (!branch.targetYears.includes(targetYear)) {
     throw new Error(`Target year ${targetYear} is not enabled for branch ${branch.id}`);
@@ -63,12 +80,47 @@ export function assembleJoinedFutureCheckpoint(
     .map((metric) => metric.key)
     .filter((key) => comparatorKeys.has(key));
 
+  const externalComparisons: JoinedExternalComparison[] = [];
+  const appendComparisons = (
+    vectors: readonly NormalizedFutureStateVector[] | undefined,
+    providerId: "destination-earth" | "isimip",
+    kind: JoinedExternalComparisonKind,
+  ) => {
+    for (const state of vectors ?? []) {
+      if (targetYearOf(state) !== targetYear) {
+        throw new Error(`${providerId} comparison target year does not match joined checkpoint target year`);
+      }
+      if (scopeIdentity(state) !== scopeIdentity(earth4AllState)) {
+        throw new Error(`${providerId} comparison must use the joined checkpoint spatial scope`);
+      }
+      if (state.provenance.providerId !== providerId) {
+        throw new Error(`${providerId} comparison has incompatible provenance`);
+      }
+      const stateKeys = new Set(state.metrics.map((metric) => metric.key));
+      externalComparisons.push(Object.freeze({
+        kind,
+        state,
+        sharedMetricKeys: Object.freeze(
+          earth4AllState.metrics.map((metric) => metric.key).filter((key) => stateKeys.has(key)),
+        ),
+      }));
+    }
+  };
+
+  appendComparisons(
+    externalEvidence.destinationEarth,
+    "destination-earth",
+    "earth-system-projection",
+  );
+  appendComparisons(externalEvidence.isimip, "isimip", "impact-projection");
+
   return Object.freeze({
     branchId: branch.id,
     targetYear,
     earth4AllState,
     worldDynamicsComparator,
     sharedMetricKeys: Object.freeze(sharedMetricKeys),
+    externalComparisons: Object.freeze(externalComparisons),
     comparisonRule:
       "Compare only semantically compatible normalized metrics. Preserve each model's provenance, assumptions, units, and lineage; do not average incompatible model outputs.",
   });

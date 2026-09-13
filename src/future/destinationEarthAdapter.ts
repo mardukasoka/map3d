@@ -84,6 +84,12 @@ export function normalizeDestinationEarthExtraction(
     provenance: {
       providerId: "destination-earth",
       modelId: `destination-earth:${result.request.dataset}`,
+      sourceClass: "model",
+      epistemicClass:
+        result.request.dataset === "extremes-dt" ||
+        result.request.dataset === "on-demand-extremes-dt"
+          ? "forecast"
+          : "scenario",
       modelVersion: result.modelVersion,
       modelVintage: result.modelVintage,
       scenarioId: result.request.experiment,
