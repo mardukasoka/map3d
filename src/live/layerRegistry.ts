@@ -87,7 +87,7 @@ export const LIVE_LAYER_REGISTRY: readonly LiveLayerDefinition[] = Object.freeze
     refreshMs: 300000,
     cacheTtlMs: 1800000,
     viewportOnly: true,
-    sourceRole: "Local camera metadata adapter; streams load only on selection",
+    sourceRole: "OpenStreetMap surveillance metadata only; media never preloads",
   }),
   Object.freeze({
     id: "infrastructure",
