@@ -56,6 +56,7 @@ function toFeature(element: OverpassElement, bounds: GeoBounds, now: number): Li
     lon,
     lat,
     timestamp: now,
+    provenanceKind: "catalogued",
     headingDeg: Number.isFinite(Number(tags.direction)) ? Number(tags.direction) : undefined,
     label: cameraLabel(tags),
     properties: {
