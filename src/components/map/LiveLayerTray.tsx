@@ -1,4 +1,9 @@
 import { css } from "@emotion/react";
+import { useEffect, useState } from "react";
+import {
+  getLiveBackendCapabilities,
+  type LiveBackendCapabilities,
+} from "../../live/backendCapabilities";
 import { LIVE_LAYER_REGISTRY, isLayerVisibleAtZoom } from "../../live/layerRegistry";
 import { hasLiveLayerAdapter } from "../../live/runtime";
 import { useLiveDataStore } from "../../state/liveDataStore";
@@ -9,6 +14,17 @@ export function LiveLayerTray() {
   const enabled = useLiveLayerStore((state) => state.enabled);
   const toggleLayer = useLiveLayerStore((state) => state.toggleLayer);
   const layers = useLiveDataStore((state) => state.layers);
+  const [capabilities, setCapabilities] = useState<LiveBackendCapabilities | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    void getLiveBackendCapabilities().then((next) => {
+      if (mounted) setCapabilities(next);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   if (!viewport) return null;
 
@@ -17,6 +33,20 @@ export function LiveLayerTray() {
   );
 
   if (available.length === 0) return null;
+
+  const providerLabels = capabilities
+    ? [
+        capabilities.providers.firms ? "FIRMS" : null,
+        capabilities.providers.ais ? "AIS" : null,
+        capabilities.providers.cctv ? "CCTV" : null,
+      ].filter((value): value is string => Boolean(value))
+    : [];
+  const backendLabel = capabilities?.backend ? "Backend" : "Public";
+  const backendTitle = capabilities?.backend
+    ? providerLabels.length > 0
+      ? `Backend live providers: ${providerLabels.join(", ")}`
+      : "Backend available; no protected live providers configured"
+    : "Public/static mode; protected live providers are unavailable";
 
   return (
     <div
@@ -78,6 +108,26 @@ export function LiveLayerTray() {
           </button>
         );
       })}
+
+      <span
+        title={backendTitle}
+        aria-label={backendTitle}
+        css={css({
+          flex: "0 0 auto",
+          alignSelf: "center",
+          padding: "0.35rem 0.5rem",
+          borderRadius: "999px",
+          border: "1px solid rgba(255, 255, 255, 0.16)",
+          background: "rgba(15, 23, 42, 0.55)",
+          color: "rgba(255, 255, 255, 0.72)",
+          fontSize: "11px",
+          lineHeight: 1,
+          whiteSpace: "nowrap",
+          cursor: "help",
+        })}
+      >
+        {capabilities ? backendLabel : "Checking…"}
+      </span>
     </div>
   );
 }
