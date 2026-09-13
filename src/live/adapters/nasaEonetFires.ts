@@ -97,6 +97,11 @@ function toFeature(event: EonetEvent, bounds: GeoBounds, now: number): LiveFeatu
     lat: selected.point[1],
     timestamp: Number.isFinite(observedAt) ? observedAt : now,
     label: event.title?.trim() || "Wildfire event",
+    provenance: {
+      kind: "catalogued",
+      source: "NASA EONET",
+      method: "Aggregated natural-event catalogue",
+    },
     properties: {
       status: event.closed ? "closed" : "open",
       geometryType: selected.geometry.type ?? null,
