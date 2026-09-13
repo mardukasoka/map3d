@@ -3,12 +3,19 @@ import type { GeoBounds, LiveViewport } from "./viewport";
 
 export type LiveProvenanceKind = "observed" | "catalogued" | "derived";
 
+export type LiveProvenance = {
+  kind: LiveProvenanceKind;
+  source: string;
+  method?: string;
+};
+
 export type LiveFeature = {
   id: string;
   layerId: LiveLayerId;
   lon: number;
   lat: number;
   timestamp: number;
+  provenance?: LiveProvenance;
   provenanceKind?: LiveProvenanceKind;
   sourceTimestamp?: number;
   altitudeM?: number;
