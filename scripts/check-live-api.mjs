@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { parseLiveBounds } from "../api/_liveBounds.mjs";
+import { liveCapabilitiesFromEnv } from "../api/capabilities.mjs";
 import { buildFirmsAreaUrl, parseFirmsCsv, parseFirmsTimestamp } from "../api/firms.mjs";
 
 function request(url) {
@@ -25,6 +26,14 @@ assert.throws(
   () => parseLiveBounds(request("/api/example?west=-181&south=-35&east=-170&north=-34")),
   /longitude bounds/,
 );
+
+const noBackendProviders = liveCapabilitiesFromEnv({});
+assert.equal(noBackendProviders.backend, true);
+assert.deepEqual(noBackendProviders.providers, { firms: false, ais: false, cctv: false });
+
+const configuredProviders = liveCapabilitiesFromEnv({ NASA_FIRMS_MAP_KEY: "SECRET_TEST_KEY" });
+assert.equal(configuredProviders.providers.firms, true);
+assert.equal(JSON.stringify(configuredProviders).includes("SECRET_TEST_KEY"), false);
 
 assert.equal(
   parseFirmsTimestamp("2026-09-13", "0527"),
@@ -57,4 +66,4 @@ const firmsUrl = buildFirmsAreaUrl({
 });
 assert.match(firmsUrl, /\/api\/area\/csv\/TEST_KEY\/VIIRS_NOAA21_NRT\/138,-35\.5,139\.5,-34\/1$/);
 
-console.log("Live API bounds + FIRMS contract: passed");
+console.log("Live API bounds + capabilities + FIRMS contract: passed");
