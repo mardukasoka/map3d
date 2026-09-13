@@ -3,10 +3,12 @@ import { getLiveLayerDefinition, type LiveLayerId } from "./layerRegistry";
 import type { LiveViewport } from "./viewport";
 import { usgsEarthquakesAdapter } from "./adapters/usgsEarthquakes";
 import { celestrakSatellitesAdapter } from "./adapters/celestrakSatellites";
+import { osmInfrastructureAdapter } from "./adapters/osmInfrastructure";
 
 const adapters: Partial<Record<LiveLayerId, LiveLayerAdapter>> = {
   earthquakes: usgsEarthquakesAdapter,
   satellites: celestrakSatellitesAdapter,
+  infrastructure: osmInfrastructureAdapter,
 };
 
 type CacheEntry = {
