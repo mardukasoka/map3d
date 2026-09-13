@@ -89,7 +89,11 @@ export const celestrakSatellitesAdapter: LiveLayerAdapter = {
           lat,
           altitudeM: geodetic.height * 1000,
           timestamp,
-          provenanceKind: "derived",
+          provenance: {
+            kind: "derived",
+            source: "CelesTrak GP visual group",
+            method: "SGP4 propagation from orbital elements",
+          },
           sourceTimestamp: Number.isFinite(sourceTimestamp) ? sourceTimestamp : undefined,
           label: element.OBJECT_NAME ?? `NORAD ${noradId}`,
           properties: {
