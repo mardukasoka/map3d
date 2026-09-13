@@ -11,6 +11,12 @@ Map3D remains a static/browser-first client. Live sources that require credentia
 - Responses must be bounded and normalized before they reach the client.
 - Runtime refresh/cache policy remains controlled by the live-layer registry.
 
+## Shared bounds validation
+
+`api/_liveBounds.mjs` is the common server-side guard for viewport-backed endpoints. It requires ordered finite `west/south/east/north` coordinates, rejects out-of-range coordinates, and caps a single request to a 30° longitude × 20° latitude span.
+
+Run `npm run check:api` to verify the bounds contract independently of the browser build. Dateline-crossing viewports are split by the browser adapter into two ordinary non-crossing requests before they reach the server boundary.
+
 ## AIS contract
 
 `GET /api/ais-live?west=<lon>&south=<lat>&east=<lon>&north=<lat>`
@@ -39,6 +45,8 @@ Example response:
 ```
 
 The current `aisProxyShipsAdapter` is intentionally **not registered** until a compatible backend endpoint is deployed. This keeps the static build truthful: the Ships control must not appear runnable when `/api/ais-live` does not exist.
+
+The direct upstream AIS connection remains provider-side work; the browser contract and server request validation are deliberately independent of that implementation so a host-specific or persistent broker can be substituted without changing Map3D's client layer.
 
 ## Future keyed sources
 
