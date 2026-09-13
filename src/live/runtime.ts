@@ -4,10 +4,12 @@ import type { LiveViewport } from "./viewport";
 import { usgsEarthquakesAdapter } from "./adapters/usgsEarthquakes";
 import { celestrakSatellitesAdapter } from "./adapters/celestrakSatellites";
 import { osmInfrastructureAdapter } from "./adapters/osmInfrastructure";
+import { nasaEonetFiresAdapter } from "./adapters/nasaEonetFires";
 
 const adapters: Partial<Record<LiveLayerId, LiveLayerAdapter>> = {
   earthquakes: usgsEarthquakesAdapter,
   satellites: celestrakSatellitesAdapter,
+  fires: nasaEonetFiresAdapter,
   infrastructure: osmInfrastructureAdapter,
 };
 
