@@ -41,7 +41,7 @@ function queryForBounds(bounds: GeoBounds): string {
     way["amenity"="hospital"](${bbox});
     node["aeroway"="aerodrome"](${bbox});
     way["aeroway"="aerodrome"](${bbox});
-  );out center tags ${MAX_FEATURES};`;
+  );out center ${MAX_FEATURES};`;
 }
 
 function infrastructureKind(tags: Record<string, string> | undefined): string {
