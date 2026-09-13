@@ -118,6 +118,7 @@ export function LiveLayerRuntime() {
               <div>
                 <strong>{feature.label ?? "Earthquake"}</strong>
                 <br />M {Number.isFinite(magnitude) ? magnitude.toFixed(1) : "?"}
+                <br />Observational solution · USGS seismic network
               </div>
             </Tooltip>
           </CircleMarker>
@@ -149,6 +150,11 @@ export function LiveLayerRuntime() {
       {fireFeatures.map((feature) => {
         const source = String(feature.properties?.source ?? layers.fires?.source ?? "NASA fire data");
         const frp = Number(feature.properties?.frp);
+        const provenanceLabel = feature.provenance?.kind === "observed"
+          ? "Observational detection"
+          : feature.provenance?.kind === "catalogued"
+            ? "Catalogued event"
+            : null;
         return (
           <CircleMarker
             key={feature.id}
@@ -160,6 +166,7 @@ export function LiveLayerRuntime() {
               <div>
                 <strong>{feature.label ?? "Fire observation"}</strong>
                 <br />{source}
+                {provenanceLabel ? <><br />{provenanceLabel}</> : null}
                 {feature.properties?.status ? (
                   <> · {String(feature.properties.status)}</>
                 ) : null}
