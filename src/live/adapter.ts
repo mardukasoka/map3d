@@ -16,7 +16,6 @@ export type LiveFeature = {
   lat: number;
   timestamp: number;
   provenance?: LiveProvenance;
-  provenanceKind?: LiveProvenanceKind;
   sourceTimestamp?: number;
   altitudeM?: number;
   headingDeg?: number;
