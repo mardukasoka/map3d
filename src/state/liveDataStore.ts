@@ -9,6 +9,7 @@ export type LiveLayerRuntimeState = {
   features: readonly LiveFeature[];
   source?: string;
   fetchedAt?: number;
+  staleAt?: number;
   lastSuccessAt?: number;
   delivery?: LiveDeliveryState;
   error?: string;
@@ -49,6 +50,7 @@ export const useLiveDataStore = create<LiveDataStore>((set) => ({
           features: response.features,
           source: response.source,
           fetchedAt: response.fetchedAt,
+          staleAt: response.staleAt,
           lastSuccessAt: Date.now(),
           delivery: response.delivery ?? "live",
           error: undefined,
