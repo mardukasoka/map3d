@@ -98,6 +98,7 @@ export function LiveLayerRuntime() {
   const earthquakeFeatures = layers.earthquakes?.features ?? [];
   const satelliteFeatures = layers.satellites?.features ?? [];
   const fireFeatures = layers.fires?.features ?? [];
+  const cameraFeatures = layers.cameras?.features ?? [];
   const infrastructureFeatures = layers.infrastructure?.features ?? [];
 
   return (
@@ -157,6 +158,42 @@ export function LiveLayerRuntime() {
                   <br />{String(feature.properties.sourceIds)}
                 </>
               ) : null}
+            </div>
+          </Tooltip>
+        </CircleMarker>
+      ))}
+
+      {cameraFeatures.map((feature) => (
+        <CircleMarker
+          key={feature.id}
+          center={[feature.lat, feature.lon]}
+          radius={3}
+          pathOptions={{ weight: 1, fillOpacity: 0.65 }}
+        >
+          <Tooltip direction="top">
+            <div>
+              <strong>{feature.label ?? "Surveillance camera"}</strong>
+              {feature.properties?.surveillanceType ? (
+                <>
+                  <br />Type: {String(feature.properties.surveillanceType)}
+                </>
+              ) : null}
+              {feature.properties?.surveillanceZone ? (
+                <>
+                  <br />Zone: {String(feature.properties.surveillanceZone)}
+                </>
+              ) : null}
+              {feature.properties?.direction ? (
+                <>
+                  <br />Direction: {String(feature.properties.direction)}
+                </>
+              ) : null}
+              {feature.properties?.operator ? (
+                <>
+                  <br />{String(feature.properties.operator)}
+                </>
+              ) : null}
+              <br />Metadata only · no stream loaded
             </div>
           </Tooltip>
         </CircleMarker>
