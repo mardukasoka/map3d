@@ -1,12 +1,16 @@
 import type { LiveLayerId } from "./layerRegistry";
 import type { GeoBounds, LiveViewport } from "./viewport";
 
+export type LiveProvenanceKind = "observed" | "catalogued" | "derived";
+
 export type LiveFeature = {
   id: string;
   layerId: LiveLayerId;
   lon: number;
   lat: number;
   timestamp: number;
+  provenanceKind?: LiveProvenanceKind;
+  sourceTimestamp?: number;
   altitudeM?: number;
   headingDeg?: number;
   speedMps?: number;
