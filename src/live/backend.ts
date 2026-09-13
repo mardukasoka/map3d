@@ -1,10 +1,10 @@
+import { assertSameOriginApiPath } from "./apiTransport";
+
 export async function fetchLiveApiJson<T>(
   path: string,
   signal?: AbortSignal,
 ): Promise<T> {
-  if (!path.startsWith("/api/")) {
-    throw new Error("Live backend requests must use a same-origin /api/ path");
-  }
+  assertSameOriginApiPath(path);
 
   const response = await fetch(path, {
     method: "GET",
