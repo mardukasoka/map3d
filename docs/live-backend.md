@@ -17,6 +17,48 @@ Map3D remains a static/browser-first client. Live sources that require credentia
 
 Run `npm run check:api` to verify the bounds contract independently of the browser build. Dateline-crossing viewports are split by the browser adapter into two ordinary non-crossing requests before they reach the server boundary.
 
+## NASA FIRMS contract
+
+`GET /api/firms?west=<lon>&south=<lat>&east=<lon>&north=<lat>`
+
+The backend handler in `api/firms.mjs` requires a server-side `NASA_FIRMS_MAP_KEY`. No key is ever sent to or stored in browser JavaScript.
+
+Optional environment variable:
+
+- `NASA_FIRMS_SOURCE` — defaults to `VIIRS_NOAA21_NRT`.
+
+The handler requests the most recent one-day FIRMS Area API CSV for the bounded viewport, normalizes it, and returns at most 500 hotspots. The default is NOAA-21 NRT rather than Suomi NPP so new work does not depend on the NPP product that NASA has announced will cease on November 1, 2026.
+
+Example response:
+
+```json
+{
+  "source": "NASA FIRMS VIIRS_NOAA21_NRT",
+  "fetchedAt": 1789250000000,
+  "bounds": {
+    "west": 138,
+    "south": -35.5,
+    "east": 139.5,
+    "north": -34
+  },
+  "hotspots": [
+    {
+      "lat": -34.9,
+      "lon": 138.6,
+      "timestamp": 1789250000000,
+      "confidence": "n",
+      "frp": 12.7,
+      "brightTi4": 332.4,
+      "satellite": "N21",
+      "instrument": "VIIRS",
+      "daynight": "D"
+    }
+  ]
+}
+```
+
+`nasaFirmsHotspotsAdapter` is intentionally **not registered** yet. The current NASA EONET wildfire-event layer remains the working static/browser fallback until `/api/firms` is actually deployed with a valid MAP_KEY.
+
 ## AIS contract
 
 `GET /api/ais-live?west=<lon>&south=<lat>&east=<lon>&north=<lat>`
@@ -52,7 +94,6 @@ The direct upstream AIS connection remains provider-side work; the browser contr
 
 The same boundary can host optional provider-specific endpoints such as:
 
-- `/api/firms` for NASA FIRMS hotspot queries using a server-held MAP_KEY.
 - `/api/cctv/*` for camera source metadata, health, still frames, or explicitly selected media.
 - other paid/BYO data providers where credentials must remain server-side.
 
