@@ -47,6 +47,7 @@ export function LiveLayerTray() {
       ? `Backend live providers: ${providerLabels.join(", ")}`
       : "Backend available; no protected live providers configured"
     : "Public/static mode; protected live providers are unavailable";
+  const showOsmAttribution = enabled.cameras || enabled.infrastructure;
 
   return (
     <div
@@ -108,6 +109,22 @@ export function LiveLayerTray() {
           </button>
         );
       })}
+
+      {showOsmAttribution ? (
+        <span
+          title="Live overlay data © OpenStreetMap contributors"
+          aria-label="Live overlay data © OpenStreetMap contributors"
+          css={css({
+            flex: "0 0 auto",
+            alignSelf: "center",
+            color: "rgba(255, 255, 255, 0.72)",
+            fontSize: "11px",
+            whiteSpace: "nowrap",
+          })}
+        >
+          © OSM contributors
+        </span>
+      ) : null}
 
       <span
         title={backendTitle}
