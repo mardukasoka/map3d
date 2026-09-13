@@ -14,6 +14,7 @@ export type FutureProviderId =
   | "ai-2027"
   | "life-3-0"
   | "ai-development-stages"
+  | "ai-cosmic-stages"
   | "science-fiction";
 
 export type FutureProviderDefinition = {
@@ -146,6 +147,16 @@ export const FUTURE_PROVIDER_REGISTRY: readonly FutureProviderDefinition[] = Obj
     spatialScale: ["global"],
     timeHorizon: "open-ended capability progression",
     notes: "Use as anticipated-development markers, not as a validated or inevitable sequence. Stages may overlap, stall, reorder, or never occur.",
+  }),
+  Object.freeze({
+    id: "ai-cosmic-stages",
+    label: "Ten stages of AI",
+    sourceClass: "foresight",
+    role: "Speculative capability ladder extending beyond AGI and ASI into transcendent, cosmic, and godlike machine-intelligence concepts",
+    defaultEpistemicClass: "scenario",
+    spatialScale: ["global", "interplanetary", "interstellar"],
+    timeHorizon: "open-ended and highly speculative",
+    notes: "Internet/futurist taxonomy rather than a peer-reviewed forecast. Use upper stages as speculative horizon markers and physics-constrained thought experiments, not expected outcomes.",
   }),
   Object.freeze({
     id: "science-fiction",
