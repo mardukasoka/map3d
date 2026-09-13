@@ -9,6 +9,17 @@ import { hasLiveLayerAdapter } from "../../live/runtime";
 import { useLiveDataStore } from "../../state/liveDataStore";
 import { useLiveLayerStore } from "../../state/liveLayerStore";
 
+function formatAge(timestamp: number | undefined, now: number): string | null {
+  if (!timestamp || !Number.isFinite(timestamp)) return null;
+  const seconds = Math.max(0, Math.floor((now - timestamp) / 1000));
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 export function LiveLayerTray() {
   const viewport = useLiveLayerStore((state) => state.viewport);
   const enabled = useLiveLayerStore((state) => state.enabled);
@@ -48,6 +59,7 @@ export function LiveLayerTray() {
       : "Backend available; no protected live providers configured"
     : "Public/static mode; protected live providers are unavailable";
   const showOsmAttribution = enabled.cameras || enabled.infrastructure;
+  const now = Date.now();
 
   return (
     <div
@@ -72,13 +84,32 @@ export function LiveLayerTray() {
       {available.map((layer) => {
         const runtime = layers[layer.id];
         const isEnabled = enabled[layer.id];
+        const isStale = Boolean(runtime?.staleAt && runtime.staleAt <= now);
+        const deliveryLabel = runtime?.delivery === "cached"
+          ? "cached"
+          : runtime?.delivery === "fallback"
+            ? "fallback"
+            : null;
+        const healthLabel = runtime?.status === "error"
+          ? "error"
+          : isStale
+            ? "stale"
+            : deliveryLabel;
         const statusSuffix = runtime?.status === "loading"
           ? " · loading"
-          : runtime?.status === "error"
-            ? " · error"
-            : runtime?.status === "ready"
-              ? ` · ${runtime.features.length}`
-              : "";
+          : runtime?.status === "ready" || runtime?.status === "error"
+            ? ` · ${healthLabel ?? runtime.features.length}`
+            : "";
+        const lastSuccess = formatAge(runtime?.lastSuccessAt, now);
+        const healthTitle = [
+          `Available from zoom ${layer.minZoom}. Loads only for the visible region.`,
+          runtime?.source ? `Source: ${runtime.source}.` : null,
+          lastSuccess ? `Last success: ${lastSuccess}.` : null,
+          runtime?.delivery === "cached" ? "Serving a valid viewport cache entry." : null,
+          runtime?.delivery === "fallback" ? "Preferred source unavailable or not configured; fallback source in use." : null,
+          isStale ? "Data has exceeded its freshness deadline." : null,
+          runtime?.error ? `Latest refresh error: ${runtime.error}` : null,
+        ].filter((value): value is string => Boolean(value)).join(" ");
 
         return (
           <button
@@ -86,7 +117,7 @@ export function LiveLayerTray() {
             type="button"
             onClick={() => toggleLayer(layer.id)}
             aria-pressed={isEnabled}
-            title={`Available from zoom ${layer.minZoom}. Loads only for the visible region.`}
+            title={healthTitle}
             css={css({
               flex: "0 0 auto",
               minHeight: "32px",
