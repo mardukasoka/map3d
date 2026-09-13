@@ -1,5 +1,15 @@
 import { assertSameOriginApiPath } from "./apiTransport";
 
+export class LiveBackendError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`Live backend request failed (${status})`);
+    this.name = "LiveBackendError";
+    this.status = status;
+  }
+}
+
 export async function fetchLiveApiJson<T>(
   path: string,
   signal?: AbortSignal,
@@ -14,7 +24,7 @@ export async function fetchLiveApiJson<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`Live backend request failed (${response.status})`);
+    throw new LiveBackendError(response.status);
   }
 
   return await response.json() as T;

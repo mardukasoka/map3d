@@ -76,7 +76,7 @@ export const LIVE_LAYER_REGISTRY: readonly LiveLayerDefinition[] = Object.freeze
     refreshMs: 300000,
     cacheTtlMs: 900000,
     viewportOnly: true,
-    sourceRole: "NASA EONET bounded open-wildfire event adapter",
+    sourceRole: "NASA FIRMS hotspot data when backend is available; NASA EONET wildfire fallback",
   }),
   Object.freeze({
     id: "cameras",
