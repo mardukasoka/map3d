@@ -71,7 +71,7 @@ function toFeature(element: OverpassElement, bounds: GeoBounds, now: number): Li
     lon,
     lat,
     timestamp: now,
-    label: name || kind.replaceAll("-", " "),
+    label: name || kind.split("-").join(" "),
     properties: {
       kind,
       osmType: element.type ?? null,
