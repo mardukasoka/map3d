@@ -12,8 +12,8 @@ export function LiveLayerTray() {
 
   if (!viewport) return null;
 
-  const available = LIVE_LAYER_REGISTRY.filter((layer) =>
-    isLayerVisibleAtZoom(layer, viewport.zoom)
+  const available = LIVE_LAYER_REGISTRY.filter(
+    (layer) => hasLiveLayerAdapter(layer.id) && isLayerVisibleAtZoom(layer, viewport.zoom),
   );
 
   if (available.length === 0) return null;
@@ -34,12 +34,13 @@ export function LiveLayerTray() {
         background: "rgba(15, 23, 42, 0.74)",
         backdropFilter: "blur(8px)",
         WebkitOverflowScrolling: "touch",
+        scrollbarWidth: "none",
       })}
       aria-label="Live map layers available at this zoom"
     >
       {available.map((layer) => {
-        const supported = hasLiveLayerAdapter(layer.id);
         const runtime = layers[layer.id];
+        const isEnabled = enabled[layer.id];
         const statusSuffix = runtime?.status === "loading"
           ? " · loading"
           : runtime?.status === "error"
@@ -52,32 +53,28 @@ export function LiveLayerTray() {
           <button
             key={layer.id}
             type="button"
-            disabled={!supported}
-            onClick={() => supported && toggleLayer(layer.id)}
-            aria-pressed={supported ? enabled[layer.id] : false}
-            title={supported
-              ? `Available from zoom ${layer.minZoom}. Loads only for the visible region.`
-              : `${layer.label} adapter is not wired yet.`}
+            onClick={() => toggleLayer(layer.id)}
+            aria-pressed={isEnabled}
+            title={`Available from zoom ${layer.minZoom}. Loads only for the visible region.`}
             css={css({
               flex: "0 0 auto",
               minHeight: "32px",
               padding: "0.35rem 0.55rem",
               borderRadius: "8px",
-              border: supported && enabled[layer.id]
+              border: isEnabled
                 ? "1px solid rgba(147, 197, 253, 0.95)"
                 : "1px solid rgba(255, 255, 255, 0.22)",
-              background: supported && enabled[layer.id]
+              background: isEnabled
                 ? "rgba(37, 99, 235, 0.88)"
                 : "rgba(15, 23, 42, 0.82)",
-              color: supported ? "white" : "rgba(255,255,255,0.48)",
+              color: "white",
               fontSize: "12px",
               lineHeight: 1,
-              cursor: supported ? "pointer" : "default",
+              cursor: "pointer",
               whiteSpace: "nowrap",
-              opacity: supported ? 1 : 0.72,
             })}
           >
-            {layer.label}{supported ? statusSuffix : " · soon"}
+            {layer.label}{statusSuffix}
           </button>
         );
       })}
