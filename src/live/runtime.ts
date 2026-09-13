@@ -74,7 +74,12 @@ export async function fetchLiveLayer(
     await adapter.fetch({ layerId: id, viewport, signal }),
     id,
   );
-  const normalized = response.delivery ? response : { ...response, delivery: "live" as const };
+  const staleAfterMs = Math.max(definition.cacheTtlMs, definition.refreshMs * 2);
+  const normalized: LiveLayerResponse = {
+    ...response,
+    staleAt: response.staleAt ?? response.fetchedAt + staleAfterMs,
+    delivery: response.delivery ?? "live",
+  };
 
   cache.delete(key);
   cache.set(key, {
