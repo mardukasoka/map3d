@@ -83,6 +83,11 @@ export const usgsEarthquakesAdapter: LiveLayerAdapter = {
         altitudeM: Number.isFinite(depthKm) ? -Number(depthKm) * 1000 : undefined,
         timestamp: Number.isFinite(item.properties?.time) ? Number(item.properties?.time) : Date.now(),
         label: item.properties?.place ?? "Earthquake",
+        provenance: {
+          kind: "observed",
+          source: "USGS Earthquake Hazards Program",
+          method: "Seismic-network event solution",
+        },
         properties: {
           magnitude: item.properties?.mag ?? null,
           sourceUrl: item.properties?.url ?? null,
