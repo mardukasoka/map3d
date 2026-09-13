@@ -10,6 +10,7 @@ export type FutureSourceClass =
   | "government"
   | "industry"
   | "model"
+  | "foresight"
   | "fiction";
 
 export type FutureSpatialScope = {
