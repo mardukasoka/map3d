@@ -43,7 +43,7 @@ export const LIVE_LAYER_REGISTRY: readonly LiveLayerDefinition[] = Object.freeze
     refreshMs: 30000,
     cacheTtlMs: 60000,
     viewportOnly: true,
-    sourceRole: "God's Eye compatible AIS adapter",
+    sourceRole: "AISStream via server-side /api/ais-live proxy; key must never ship to the browser",
   }),
   Object.freeze({
     id: "satellites",
