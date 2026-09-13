@@ -11,11 +11,37 @@ Map3D remains a static/browser-first client. Live sources that require credentia
 - Responses must be bounded and normalized before they reach the client.
 - Runtime refresh/cache policy remains controlled by the live-layer registry.
 
+## Deployment modes
+
+### Static-only hosting
+
+GitHub Pages and other static hosts do not provide Map3D's `/api/*` handlers. The browser attempts `/api/capabilities` once per page session, treats a missing or invalid response as `backend: false`, and continues with public browser-safe adapters. For the fire layer this means NASA EONET remains available without any backend configuration.
+
+### Backend-enabled hosting
+
+A host that exposes the files in `api/` as same-origin HTTP handlers can advertise configured providers through `GET /api/capabilities`. The client caches that response for the page session and uses protected providers only when the capability is explicitly true.
+
+Current capability response shape:
+
+```json
+{
+  "version": 1,
+  "backend": true,
+  "providers": {
+    "firms": true,
+    "ais": false,
+    "cctv": false
+  }
+}
+```
+
+Capabilities reveal only availability booleans. Secret values are never serialized into the response.
+
 ## Shared bounds validation
 
 `api/_liveBounds.mjs` is the common server-side guard for viewport-backed endpoints. It requires ordered finite `west/south/east/north` coordinates, rejects out-of-range coordinates, and caps a single request to a 30° longitude × 20° latitude span.
 
-Run `npm run check:api` to verify the bounds contract independently of the browser build. Dateline-crossing viewports are split by the browser adapter into two ordinary non-crossing requests before they reach the server boundary.
+Run `npm run check:api` to verify the bounds, capability, and provider contracts independently of the browser build. Dateline-crossing viewports are split by the browser adapter into two ordinary non-crossing requests before they reach the server boundary.
 
 ## NASA FIRMS contract
 
@@ -57,7 +83,7 @@ Example response:
 }
 ```
 
-`nasaFirmsHotspotsAdapter` is intentionally **not registered** yet. The current NASA EONET wildfire-event layer remains the working static/browser fallback until `/api/firms` is actually deployed with a valid MAP_KEY.
+The registered fire adapter is backend-aware: it uses FIRMS when `/api/capabilities` reports `providers.firms: true`; otherwise it goes directly to the public NASA EONET wildfire-event adapter. If a configured FIRMS backend later fails, the adapter temporarily backs off and uses EONET rather than breaking the layer.
 
 ## AIS contract
 
@@ -86,7 +112,7 @@ Example response:
 }
 ```
 
-The current `aisProxyShipsAdapter` is intentionally **not registered** until a compatible backend endpoint is deployed. This keeps the static build truthful: the Ships control must not appear runnable when `/api/ais-live` does not exist.
+The current `aisProxyShipsAdapter` remains intentionally unregistered until a compatible backend endpoint is deployed. The capability manifest therefore reports `ais: false`. This keeps the static build truthful: the Ships control must not appear runnable when `/api/ais-live` does not exist.
 
 The direct upstream AIS connection remains provider-side work; the browser contract and server request validation are deliberately independent of that implementation so a host-specific or persistent broker can be substituted without changing Map3D's client layer.
 

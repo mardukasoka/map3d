@@ -1,5 +1,6 @@
 import type { LiveLayerAdapter, LiveLayerRequest, LiveLayerResponse } from "../adapter";
 import { LiveBackendError } from "../backend";
+import { getLiveBackendCapabilities } from "../backendCapabilities";
 import { nasaEonetFiresAdapter } from "./nasaEonetFires";
 import { nasaFirmsHotspotsAdapter } from "./nasaFirmsHotspots";
 
@@ -21,12 +22,13 @@ function aborted(request: LiveLayerRequest): boolean {
 }
 
 export const preferredFireAdapter: LiveLayerAdapter = {
-  id: "preferred-fire-source-v1",
+  id: "preferred-fire-source-v2",
   layerId: "fires",
   async fetch(request: LiveLayerRequest): Promise<LiveLayerResponse> {
     const now = Date.now();
+    const capabilities = await getLiveBackendCapabilities();
 
-    if (now >= firmsRetryAfter) {
+    if (capabilities.providers.firms && now >= firmsRetryAfter) {
       try {
         const response = await nasaFirmsHotspotsAdapter.fetch(request);
         firmsRetryAfter = 0;
@@ -40,7 +42,9 @@ export const preferredFireAdapter: LiveLayerAdapter = {
     const fallback = await nasaEonetFiresAdapter.fetch(request);
     return {
       ...fallback,
-      source: `${fallback.source} (FIRMS fallback)`,
+      source: capabilities.providers.firms
+        ? `${fallback.source} (FIRMS fallback)`
+        : `${fallback.source} (public fallback)`,
     };
   },
 };
