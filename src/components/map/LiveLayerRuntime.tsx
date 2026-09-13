@@ -97,6 +97,7 @@ export function LiveLayerRuntime() {
 
   const earthquakeFeatures = layers.earthquakes?.features ?? [];
   const satelliteFeatures = layers.satellites?.features ?? [];
+  const fireFeatures = layers.fires?.features ?? [];
   const infrastructureFeatures = layers.infrastructure?.features ?? [];
 
   return (
@@ -139,6 +140,27 @@ export function LiveLayerRuntime() {
           </CircleMarker>
         );
       })}
+
+      {fireFeatures.map((feature) => (
+        <CircleMarker
+          key={feature.id}
+          center={[feature.lat, feature.lon]}
+          radius={5}
+          pathOptions={{ weight: 2, fillOpacity: 0.75 }}
+        >
+          <Tooltip direction="top">
+            <div>
+              <strong>{feature.label ?? "Wildfire event"}</strong>
+              <br />NASA EONET · {String(feature.properties?.status ?? "open")}
+              {feature.properties?.sourceIds ? (
+                <>
+                  <br />{String(feature.properties.sourceIds)}
+                </>
+              ) : null}
+            </div>
+          </Tooltip>
+        </CircleMarker>
+      ))}
 
       {infrastructureFeatures.map((feature) => (
         <CircleMarker
