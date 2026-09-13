@@ -64,6 +64,7 @@ export const useLiveDataStore = create<LiveDataStore>((set) => ({
     })),
   clearLayer: (id) =>
     set((state) => {
+      if (!state.layers[id]) return state;
       const layers = { ...state.layers };
       delete layers[id];
       return { layers };
