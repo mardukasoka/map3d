@@ -4,7 +4,6 @@ import { pointInBounds } from "../viewport";
 
 const EONET_ENDPOINT = "https://eonet.gsfc.nasa.gov/api/v3/events";
 const MAX_EVENTS = 200;
-const LOOKBACK_DAYS = 30;
 
 type EonetGeometry = {
   date?: string;
@@ -112,7 +111,6 @@ async function fetchFragment(bounds: GeoBounds, signal?: AbortSignal): Promise<E
   const url = new URL(EONET_ENDPOINT);
   url.searchParams.set("category", "wildfires");
   url.searchParams.set("status", "open");
-  url.searchParams.set("days", String(LOOKBACK_DAYS));
   url.searchParams.set("limit", String(MAX_EVENTS));
   url.searchParams.set("bbox", bboxParam(bounds));
 
