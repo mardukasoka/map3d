@@ -42,6 +42,7 @@ export const preferredFireAdapter: LiveLayerAdapter = {
     const fallback = await nasaEonetFiresAdapter.fetch(request);
     return {
       ...fallback,
+      delivery: "fallback",
       source: capabilities.providers.firms
         ? `${fallback.source} (FIRMS fallback)`
         : `${fallback.source} (public fallback)`,
