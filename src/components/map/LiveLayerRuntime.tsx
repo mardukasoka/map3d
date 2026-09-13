@@ -97,6 +97,7 @@ export function LiveLayerRuntime() {
 
   const earthquakeFeatures = layers.earthquakes?.features ?? [];
   const satelliteFeatures = layers.satellites?.features ?? [];
+  const infrastructureFeatures = layers.infrastructure?.features ?? [];
 
   return (
     <>
@@ -138,6 +139,27 @@ export function LiveLayerRuntime() {
           </CircleMarker>
         );
       })}
+
+      {infrastructureFeatures.map((feature) => (
+        <CircleMarker
+          key={feature.id}
+          center={[feature.lat, feature.lon]}
+          radius={4}
+          pathOptions={{ weight: 1, fillOpacity: 0.7 }}
+        >
+          <Tooltip direction="top">
+            <div>
+              <strong>{feature.label ?? "Infrastructure"}</strong>
+              <br />{String(feature.properties?.kind ?? "infrastructure")}
+              {feature.properties?.operator ? (
+                <>
+                  <br />{String(feature.properties.operator)}
+                </>
+              ) : null}
+            </div>
+          </Tooltip>
+        </CircleMarker>
+      ))}
     </>
   );
 }
