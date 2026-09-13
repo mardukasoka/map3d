@@ -81,6 +81,7 @@ export const celestrakSatellitesAdapter: LiveLayerAdapter = {
         if (!pointInBounds(lon, lat, request.viewport.bounds)) continue;
 
         const noradId = String(element.NORAD_CAT_ID ?? "unknown");
+        const sourceTimestamp = Date.parse(element.EPOCH ?? "");
         features.push({
           id: `celestrak-${noradId}`,
           layerId: "satellites",
@@ -88,12 +89,15 @@ export const celestrakSatellitesAdapter: LiveLayerAdapter = {
           lat,
           altitudeM: geodetic.height * 1000,
           timestamp,
+          provenanceKind: "derived",
+          sourceTimestamp: Number.isFinite(sourceTimestamp) ? sourceTimestamp : undefined,
           label: element.OBJECT_NAME ?? `NORAD ${noradId}`,
           properties: {
             noradCatId: noradId,
             objectId: element.OBJECT_ID ?? null,
             epoch: element.EPOCH ?? null,
             sourceGroup: "visual",
+            derivation: "SGP4 propagation from CelesTrak GP elements",
           },
         });
       } catch {
@@ -104,7 +108,7 @@ export const celestrakSatellitesAdapter: LiveLayerAdapter = {
     return {
       layerId: "satellites",
       fetchedAt: timestamp,
-      source: "CelesTrak GP visual group",
+      source: "CelesTrak GP visual group; positions propagated locally with SGP4",
       bounds: request.viewport.bounds,
       features,
     };
