@@ -143,26 +143,49 @@ export function LiveLayerRuntime() {
         );
       })}
 
-      {fireFeatures.map((feature) => (
-        <CircleMarker
-          key={feature.id}
-          center={[feature.lat, feature.lon]}
-          radius={5}
-          pathOptions={{ weight: 2, fillOpacity: 0.75 }}
-        >
-          <Tooltip direction="top">
-            <div>
-              <strong>{feature.label ?? "Wildfire event"}</strong>
-              <br />NASA EONET · {String(feature.properties?.status ?? "open")}
-              {feature.properties?.sourceIds ? (
-                <>
-                  <br />{String(feature.properties.sourceIds)}
-                </>
-              ) : null}
-            </div>
-          </Tooltip>
-        </CircleMarker>
-      ))}
+      {fireFeatures.map((feature) => {
+        const source = String(feature.properties?.source ?? layers.fires?.source ?? "NASA fire data");
+        const frp = Number(feature.properties?.frp);
+        return (
+          <CircleMarker
+            key={feature.id}
+            center={[feature.lat, feature.lon]}
+            radius={5}
+            pathOptions={{ weight: 2, fillOpacity: 0.75 }}
+          >
+            <Tooltip direction="top">
+              <div>
+                <strong>{feature.label ?? "Fire observation"}</strong>
+                <br />{source}
+                {feature.properties?.status ? (
+                  <> · {String(feature.properties.status)}</>
+                ) : null}
+                {feature.properties?.sourceIds ? (
+                  <>
+                    <br />{String(feature.properties.sourceIds)}
+                  </>
+                ) : null}
+                {feature.properties?.confidence ? (
+                  <>
+                    <br />Confidence: {String(feature.properties.confidence)}
+                  </>
+                ) : null}
+                {Number.isFinite(frp) ? (
+                  <>
+                    <br />FRP: {frp.toFixed(1)} MW
+                  </>
+                ) : null}
+                {feature.properties?.satellite ? (
+                  <>
+                    <br />{String(feature.properties.satellite)}
+                    {feature.properties?.instrument ? ` · ${String(feature.properties.instrument)}` : ""}
+                  </>
+                ) : null}
+              </div>
+            </Tooltip>
+          </CircleMarker>
+        );
+      })}
 
       {cameraFeatures.map((feature) => (
         <CircleMarker
