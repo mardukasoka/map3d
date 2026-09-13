@@ -42,6 +42,7 @@ export function LiveLayerRuntime() {
         ...controllersRef.current.keys(),
         ...timersRef.current.keys(),
       ])) cancelLayer(id);
+      for (const layer of LIVE_LAYER_REGISTRY) clearLayer(layer.id);
       return;
     }
 
@@ -55,7 +56,7 @@ export function LiveLayerRuntime() {
 
     for (const layer of LIVE_LAYER_REGISTRY) {
       if (!activeSet.has(layer.id)) {
-        if (!enabled[layer.id]) clearLayer(layer.id);
+        clearLayer(layer.id);
         continue;
       }
 
