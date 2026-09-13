@@ -35,6 +35,7 @@ export type LiveLayerRequest = {
 export type LiveLayerResponse = {
   layerId: LiveLayerId;
   fetchedAt: number;
+  staleAt?: number;
   source: string;
   delivery?: LiveDeliveryState;
   bounds: GeoBounds;
