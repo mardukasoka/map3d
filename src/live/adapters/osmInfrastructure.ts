@@ -71,6 +71,7 @@ function toFeature(element: OverpassElement, bounds: GeoBounds, now: number): Li
     lon,
     lat,
     timestamp: now,
+    provenanceKind: "catalogued",
     label: name || kind.split("-").join(" "),
     properties: {
       kind,
