@@ -24,6 +24,8 @@ export type LiveFeature = {
   properties?: Readonly<Record<string, string | number | boolean | null>>;
 };
 
+export type LiveDeliveryState = "live" | "cached" | "fallback";
+
 export type LiveLayerRequest = {
   layerId: LiveLayerId;
   viewport: LiveViewport;
@@ -33,7 +35,9 @@ export type LiveLayerRequest = {
 export type LiveLayerResponse = {
   layerId: LiveLayerId;
   fetchedAt: number;
+  staleAt?: number;
   source: string;
+  delivery?: LiveDeliveryState;
   bounds: GeoBounds;
   features: readonly LiveFeature[];
 };

@@ -66,21 +66,29 @@ export async function fetchLiveLayer(
   const cached = cache.get(key);
   const now = Date.now();
 
-  if (cached && cached.expiresAt > now) return cached.response;
+  if (cached && cached.expiresAt > now) {
+    return { ...cached.response, delivery: "cached" };
+  }
 
   const response = assertLayerResponse(
     await adapter.fetch({ layerId: id, viewport, signal }),
     id,
   );
+  const staleAfterMs = Math.max(definition.cacheTtlMs, definition.refreshMs * 2);
+  const normalized: LiveLayerResponse = {
+    ...response,
+    staleAt: response.staleAt ?? response.fetchedAt + staleAfterMs,
+    delivery: response.delivery ?? "live",
+  };
 
   cache.delete(key);
   cache.set(key, {
     expiresAt: now + definition.cacheTtlMs,
-    response,
+    response: normalized,
   });
   trimCache();
 
-  return response;
+  return normalized;
 }
 
 export function clearExpiredLiveLayerCache(now = Date.now()): void {
