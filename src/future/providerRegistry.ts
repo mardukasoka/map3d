@@ -10,6 +10,9 @@ export type FutureProviderId =
   | "iea"
   | "national-government"
   | "industry-scenario"
+  | "artilect-war"
+  | "ai-2027"
+  | "life-3-0"
   | "science-fiction";
 
 export type FutureProviderDefinition = {
@@ -102,6 +105,36 @@ export const FUTURE_PROVIDER_REGISTRY: readonly FutureProviderDefinition[] = Obj
     role: "Strategic scenarios and sector outlooks from industry participants",
     defaultEpistemicClass: "scenario",
     spatialScale: ["global", "region", "sector"],
+  }),
+  Object.freeze({
+    id: "artilect-war",
+    label: "The Coming War of the Artilects",
+    sourceClass: "foresight",
+    role: "Conflict-oriented AI-transition framing centered on polarization between humans, AI advocates, and advanced machine intelligence",
+    defaultEpistemicClass: "scenario",
+    spatialScale: ["global"],
+    timeHorizon: "AI transition and post-human conflict horizon",
+    notes: "Use as a branch-generating conflict scenario source, not as an empirical forecast.",
+  }),
+  Object.freeze({
+    id: "ai-2027",
+    label: "AI 2027",
+    sourceClass: "foresight",
+    role: "Near-term AI capability-race and transition scenario used to generate candidate short-horizon lattice branches",
+    defaultEpistemicClass: "scenario",
+    spatialScale: ["global"],
+    timeHorizon: "near term",
+    notes: "Preserve scenario assumptions and branch structure; do not present the scenario timeline as observed fact.",
+  }),
+  Object.freeze({
+    id: "life-3-0",
+    label: "Life 3.0 aftermath scenarios",
+    sourceClass: "foresight",
+    role: "Long-run AI aftermath attractor states derived from Max Tegmark's scenario set",
+    defaultEpistemicClass: "scenario",
+    spatialScale: ["global"],
+    timeHorizon: "long-run post-superintelligence",
+    notes: "Treat named aftermath outcomes as qualitative attractor states, not probability-weighted forecasts unless probabilities are supplied separately.",
   }),
   Object.freeze({
     id: "science-fiction",
