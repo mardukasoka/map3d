@@ -9,11 +9,46 @@ import L, { LatLng, LatLngBounds } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { css } from "@emotion/react";
 import { CircleMinus, MousePointerClick } from "lucide-react";
+import { useLiveLayerStore } from "../../state/liveLayerStore";
+import { LiveLayerTray } from "./LiveLayerTray";
+import { LiveLayerRuntime } from "./LiveLayerRuntime";
 
 const IconSize = css({
   width: "14px",
   height: "14px",
 });
+
+function LiveViewportObserver() {
+  const setViewport = useLiveLayerStore((state) => state.setViewport);
+  const map = useMapEvents({
+    moveend() {
+      syncViewport();
+    },
+    zoomend() {
+      syncViewport();
+    },
+  });
+
+  const syncViewport = () => {
+    const bounds = map.getBounds();
+    setViewport({
+      zoom: map.getZoom(),
+      bounds: {
+        west: bounds.getWest(),
+        south: bounds.getSouth(),
+        east: bounds.getEast(),
+        north: bounds.getNorth(),
+      },
+    });
+  };
+
+  useEffect(() => {
+    syncViewport();
+    return () => setViewport(null);
+  }, [map, setViewport]);
+
+  return null;
+}
 
 function RectangleSelector({
   isDrag = true,
@@ -88,7 +123,7 @@ function RectangleSelector({
       }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchEnd = () => {
       if (firstPoint) {
         const latlng = lastLatlngRef.current || firstPoint;
 
@@ -107,7 +142,7 @@ function RectangleSelector({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [map, isDrag, firstPoint, onChange]);
+  }, [map, isDrag, firstPoint, onChange, onDrawChange]);
 
   useEffect(() => {
     if (map) {
@@ -220,6 +255,7 @@ export function MapComponent({
         </button>
       </div>
 
+      <LiveLayerTray />
       <MapContainer
         center={[40.8, -73.95]}
         zoom={13}
@@ -232,6 +268,8 @@ export function MapComponent({
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <LiveViewportObserver />
+        <LiveLayerRuntime />
         <RectangleSelector
           bounds={bounds}
           drawBounds={drawBounds}
