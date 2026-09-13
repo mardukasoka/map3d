@@ -76,7 +76,7 @@ export const LIVE_LAYER_REGISTRY: readonly LiveLayerDefinition[] = Object.freeze
     refreshMs: 300000,
     cacheTtlMs: 900000,
     viewportOnly: true,
-    sourceRole: "God's Eye compatible active-fire adapter",
+    sourceRole: "NASA EONET bounded open-wildfire event adapter",
   }),
   Object.freeze({
     id: "cameras",
