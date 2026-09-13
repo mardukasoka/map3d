@@ -18,8 +18,12 @@ export type JuliaModelDefinition = {
   notes: string;
 };
 
+function defineJuliaModel(definition: JuliaModelDefinition): JuliaModelDefinition {
+  return Object.freeze(definition);
+}
+
 export const JULIA_MODEL_REGISTRY: readonly JuliaModelDefinition[] = Object.freeze([
-  Object.freeze({
+  defineJuliaModel({
     id: "earthengine-jl",
     label: "EarthEngine.jl",
     role: "observation",
@@ -30,7 +34,7 @@ export const JULIA_MODEL_REGISTRY: readonly JuliaModelDefinition[] = Object.free
     notes:
       "Julia wrapper around the Google Earth Engine Python API. Use for observed/reconstructed geospatial state and later calibration, not as a future prediction engine. Keep Earth Engine authentication and raster processing off-device.",
   }),
-  Object.freeze({
+  defineJuliaModel({
     id: "worlddynamics-jl",
     label: "WorldDynamics.jl",
     role: "simulation-framework",
@@ -41,7 +45,7 @@ export const JULIA_MODEL_REGISTRY: readonly JuliaModelDefinition[] = Object.free
     notes:
       "ModelingToolkit/DifferentialEquations framework containing World1/2/3 model lineages. Preserve model version and lineage; do not collapse historical World3 outputs into Earth4All outputs.",
   }),
-  Object.freeze({
+  defineJuliaModel({
     id: "earth4all-jl",
     label: "Earth4All.jl",
     role: "scenario-engine",
