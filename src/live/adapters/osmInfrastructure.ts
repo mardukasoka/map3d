@@ -71,6 +71,11 @@ function toFeature(element: OverpassElement, bounds: GeoBounds, now: number): Li
     lon,
     lat,
     timestamp: now,
+    provenance: {
+      kind: "catalogued",
+      source: "OpenStreetMap contributors",
+      method: "OSM feature metadata via Overpass API",
+    },
     label: name || kind.split("-").join(" "),
     properties: {
       kind,

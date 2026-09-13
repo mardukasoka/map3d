@@ -56,6 +56,11 @@ function toFeature(element: OverpassElement, bounds: GeoBounds, now: number): Li
     lon,
     lat,
     timestamp: now,
+    provenance: {
+      kind: "catalogued",
+      source: "OpenStreetMap contributors",
+      method: "OSM surveillance metadata via Overpass API",
+    },
     headingDeg: Number.isFinite(Number(tags.direction)) ? Number(tags.direction) : undefined,
     label: cameraLabel(tags),
     properties: {

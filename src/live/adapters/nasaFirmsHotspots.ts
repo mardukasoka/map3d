@@ -43,6 +43,11 @@ export const nasaFirmsHotspotsAdapter: LiveLayerAdapter = {
         lat: hotspot.lat,
         timestamp,
         label: "Satellite fire hotspot",
+        provenance: {
+          kind: "observed",
+          source: payload.source ?? "NASA FIRMS",
+          method: "Satellite thermal-anomaly detection",
+        },
         properties: {
           source: payload.source ?? "NASA FIRMS",
           confidence: hotspot.confidence ?? null,

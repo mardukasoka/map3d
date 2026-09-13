@@ -118,6 +118,7 @@ export function LiveLayerRuntime() {
               <div>
                 <strong>{feature.label ?? "Earthquake"}</strong>
                 <br />M {Number.isFinite(magnitude) ? magnitude.toFixed(1) : "?"}
+                <br />Observational solution · USGS seismic network
               </div>
             </Tooltip>
           </CircleMarker>
@@ -126,6 +127,7 @@ export function LiveLayerRuntime() {
 
       {satelliteFeatures.map((feature) => {
         const altitudeKm = Number(feature.altitudeM ?? 0) / 1000;
+        const epoch = feature.sourceTimestamp ? new Date(feature.sourceTimestamp).toISOString() : null;
         return (
           <CircleMarker
             key={feature.id}
@@ -137,6 +139,8 @@ export function LiveLayerRuntime() {
               <div>
                 <strong>{feature.label ?? "Satellite"}</strong>
                 <br />Altitude {Number.isFinite(altitudeKm) ? altitudeKm.toFixed(0) : "?"} km
+                <br />Propagated position · SGP4
+                {epoch ? <><br />Element epoch: {epoch}</> : null}
               </div>
             </Tooltip>
           </CircleMarker>
@@ -146,6 +150,11 @@ export function LiveLayerRuntime() {
       {fireFeatures.map((feature) => {
         const source = String(feature.properties?.source ?? layers.fires?.source ?? "NASA fire data");
         const frp = Number(feature.properties?.frp);
+        const provenanceLabel = feature.provenance?.kind === "observed"
+          ? "Observational detection"
+          : feature.provenance?.kind === "catalogued"
+            ? "Catalogued event"
+            : null;
         return (
           <CircleMarker
             key={feature.id}
@@ -157,6 +166,7 @@ export function LiveLayerRuntime() {
               <div>
                 <strong>{feature.label ?? "Fire observation"}</strong>
                 <br />{source}
+                {provenanceLabel ? <><br />{provenanceLabel}</> : null}
                 {feature.properties?.status ? (
                   <> · {String(feature.properties.status)}</>
                 ) : null}
@@ -197,6 +207,7 @@ export function LiveLayerRuntime() {
           <Tooltip direction="top">
             <div>
               <strong>{feature.label ?? "Surveillance camera"}</strong>
+              <br />Catalogued OSM metadata
               {feature.properties?.surveillanceType ? (
                 <>
                   <br />Type: {String(feature.properties.surveillanceType)}
@@ -234,6 +245,7 @@ export function LiveLayerRuntime() {
             <div>
               <strong>{feature.label ?? "Infrastructure"}</strong>
               <br />{String(feature.properties?.kind ?? "infrastructure")}
+              <br />Catalogued OSM metadata
               {feature.properties?.operator ? (
                 <>
                   <br />{String(feature.properties.operator)}
