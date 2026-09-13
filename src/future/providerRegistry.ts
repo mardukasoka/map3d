@@ -13,6 +13,7 @@ export type FutureProviderId =
   | "artilect-war"
   | "ai-2027"
   | "life-3-0"
+  | "ai-development-stages"
   | "science-fiction";
 
 export type FutureProviderDefinition = {
@@ -135,6 +136,16 @@ export const FUTURE_PROVIDER_REGISTRY: readonly FutureProviderDefinition[] = Obj
     spatialScale: ["global"],
     timeHorizon: "long-run post-superintelligence",
     notes: "Treat named aftermath outcomes as qualitative attractor states, not probability-weighted forecasts unless probabilities are supplied separately.",
+  }),
+  Object.freeze({
+    id: "ai-development-stages",
+    label: "Nine stages of future AI",
+    sourceClass: "foresight",
+    role: "Heuristic capability-and-autonomy development ladder from rule-based systems through global-network coordination",
+    defaultEpistemicClass: "scenario",
+    spatialScale: ["global"],
+    timeHorizon: "open-ended capability progression",
+    notes: "Use as anticipated-development markers, not as a validated or inevitable sequence. Stages may overlap, stall, reorder, or never occur.",
   }),
   Object.freeze({
     id: "science-fiction",
